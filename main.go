@@ -2,7 +2,7 @@ package main
 
 import (
   "github.com/gorilla/mux"
-  "github.com/kikozai/moon/app"
+  "github.com/kikozai/Moon/auth"
   "os"
   "fmt"
   "net/http"
@@ -11,7 +11,7 @@ import (
 func main() {
 
   router := mux.NewRouter()
-  router.Use(app.JwtAuthentication) // добавляем middleware проверки JWT-токена
+  router.Use(auth.JwtAuthentication) // добавляем middleware проверки JWT-токена
 
   port := os.Getenv("PORT") //Получить порт из файла .env; мы не указали порт, поэтому при локальном тестировании должна возвращаться пустая строка
   if port == "" {
