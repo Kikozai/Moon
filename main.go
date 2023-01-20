@@ -1,28 +1,15 @@
 package main
 
 import (
-  "github.com/gorilla/mux"
-  "github.com/kikozai/Moon/auth"
-  "os"
-  "fmt"
-  "net/http"
+ "github.com/gin-gonic/gin"
+ "net/http"
 )
 
 func main() {
-
-  router := mux.NewRouter()
-  router.Use(auth.JwtAuthentication) // добавляем middleware проверки JWT-токена
-
-  port := os.Getenv("PORT") //Получить порт из файла .env; мы не указали порт, поэтому при локальном тестировании должна возвращаться пустая строка
-  if port == "" {
-    port = "8000" //localhost
-  }
-
-  fmt.Println(port)
-
-  err := http.ListenAndServe(":" + port, router) //Запустите приложение, посетите localhost:8000/api
-
-  if err != nil {
-    fmt.Print(err)
-  }
+  g := gin.Default()
+  g.LoadHTMLGlob("templates/*.html")
+  g.GET("/", func(c *gin.Context){ 
+    c.HTML(http.StatusOK,"paha.html",nil)
+  })
+  g.RunTLS(":8080","./cert/server.pem", "./cert/server-key.pem")
 }
