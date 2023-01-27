@@ -1,10 +1,10 @@
-package app
+package auth
 
 import (
   "net/http"
   u "lens/utils"
   "strings"
-  "go-contacts/models"
+  "moon/model"
   jwt "github.com/dgrijalva/jwt-go"
   "os"
   "context"
