@@ -1,3 +1,5 @@
+
+
 package utils
 
 import "golang.org/x/crypto/bcrypt"
@@ -10,4 +12,3 @@ func HashPassword(password string) string {
 func ComparePassword(hashedPassword string, candidatePassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(candidatePassword))
 }
-
