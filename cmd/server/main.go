@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/Kikozai/Moon/config"
 	"github.com/Kikozai/Moon/controllers"
@@ -18,12 +20,16 @@ import (
 var (
 	server *gin.Engine
 	db     *dbConn.Queries
+	ctx    context.Context
 
 	AuthController controllers.AuthController
+	UserController controllers.UserController
 	AuthRoutes     routes.AuthRoutes
+	UserRoutes     routes.UserRoutes
 )
 
 func init() {
+	ctx = context.TODO()
 	config, err := config.LoadConfig(".")
 
 	if err != nil {
@@ -39,10 +45,19 @@ func init() {
 
 	fmt.Println("PostgreSQL connected successfully...")
 
-	AuthController = *controllers.NewAuthController(db)
-	AuthRoutes = routes.NewAuthRoutes(AuthController)
+	AuthController = *controllers.NewAuthController(db, ctx)
+	UserController = controllers.NewUserController(db, ctx)
+	AuthRoutes = routes.NewAuthRoutes(AuthController,db)
+	UserRoutes = routes.NewUserRoutes(UserController,db)
 
 	server = gin.Default()
+	server.LoadHTMLGlob("templates/*.html")
+
+	server.GET("/", func(c *gin.Context){
+		c.HTML(http.StatusOK,"index.html", nil)
+	})
+
+
 }
 
 func main() {
@@ -52,6 +67,12 @@ func main() {
 		log.Fatalf("could not load config: %v", err)
 	}
 
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{config.Origin}
+	corsConfig.AllowCredentials = true
+
+	server.Use(cors.New(corsConfig))
+
 	router := server.Group("/api")
 
 	router.GET("/healthchecker", func(ctx *gin.Context) {
@@ -59,10 +80,10 @@ func main() {
 	})
 
 	AuthRoutes.AuthRoute(router)
-        server.NoRoute(func(ctx *gin.Context) {
-		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": 
-                       fmt.Sprintf("Route %s not found", ctx.Request.URL)})
+	UserRoutes.UserRoute(router)
+
+	server.NoRoute(func(ctx *gin.Context) {
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": fmt.Sprintf("Route %s not found", ctx.Request.URL)})
 	})
 	log.Fatal(server.Run(":" + config.Port))
 }
-
