@@ -13,4 +13,5 @@ CREATE TABLE "users" (
 );
 
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
